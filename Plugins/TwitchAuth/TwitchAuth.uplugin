@@ -1,0 +1,32 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.1.7",
+	"FriendlyName": "Twitch Auth",
+	"Description": "This plugin let's your players sign into Twitch from within your game to check if they are subscribers and or followers.",
+	"Category": "Twitch Integration",
+	"CreatedBy": "Anthony Posselli",
+	"CreatedByURL": "https://github.com/APosselli",
+	"SupportURL": "anthony.posselli@gmail.com",
+	"EngineVersion": "4.22.0",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "TwitchAuth",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Win32"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "WebBrowserWidget",
+			"Enabled": true
+		}
+	]
+}
