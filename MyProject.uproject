@@ -7,6 +7,10 @@
 		{
 			"Name": "TwitchPlay",
 			"Enabled": true
+		},
+		{
+			"Name": "HoudiniEngine",
+			"Enabled": true
 		}
 	]
 }
