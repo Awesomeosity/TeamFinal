@@ -35,6 +35,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Commands Setup")
 		FString command_encapsulation_char_ = "!";
 
+	// Character to use for unencapsulated commands. Commands will be read in the form CHAR_Command (no spaces or underscores!)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Commands Setup")
+		FString command_unencapsulated_char_ = "!";
+
 	/**
 	 * Character to use for command options encapsulation. Commands will be read in the form CHAR_Option1[,Option2,..]_CHAR (no spaces or underscores!)
 	 * Multiple options can be specified and will be split into an FString array upon parsing
@@ -71,33 +75,41 @@ public:
 		void SetupEncapsulationChars(const FString _command_char, const FString _options_char);
 
 	/**
+	 * Setups the encapsulation characters to use for commands and options.
+	 *
+	 * @param _command_char - Character(s) to use for unencapsulated commands.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Commands Setup")
+		void SetupUnencapsulatedChar(const FString _command_char);
+
+	/**
 	 * Registers a command to receive an event whenever that command is called via chat.
 	 * Only one function associated with a single object can be registered per command (as a delegate pointer!).
 	 * You actually need to create a delegate, bind it to a function and pass that in by reference.
 	 * If you try to register another function or another object with the same command the new function of that object will replace the previous one.
 	 * If you need to fire multiple events when a single command is received consider having just one event calling all the others.
 	 *
-	 * @param _command_name - The command to register (CASE SENSITIVE).
+	 * @param _command_name - The command to register (NOT CASE SENSITIVE).
 	 * @param _callback_function - The function to fire when the event rises.
 	 * @param _out_result - Result of the operation.
 	 *
 	 * @return Whether the registration was successfully completed.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Commands Setup")
-		bool RegisterCommand(const FString _command_name, const FOnCommandReceived& _callback_function, FString& _out_result);
+		bool RegisterCommand(FString _command_name, const FOnCommandReceived& _callback_function, FString& _out_result);
 
 	/**
 	* Unregisters a command to stop receiving events whenever that command is called via chat.
 	* Keep in mind that since each command can only be bound to a single function (and single object) unregistering that command will remove any function from any object.
 	*
-	* @param _command_name - The command to unregister (CASE SENSITIVE).
+	* @param _command_name - The command to unregister (NOT CASE SENSITIVE).
 	* @param _callback_function - The command to unregister.
 	* @param _out_result - Result of the operation.
 	*
 	* @return Whether the unregistration was successfully completed.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Commands Setup")
-		bool UnregisterCommand(const FString _command_name, FString& _out_result);
+		bool UnregisterCommand(FString _command_name, FString& _out_result);
 
 	virtual ~UTwitchPlayComponent();
 
@@ -142,4 +154,14 @@ private:
 	 * @return String delimited by the delimiters characters. Returns "" if no delimited string was found.
 	 */
 	FString GetDelimitedString(const FString& _in_string, const FString& _delimiter) const;
+
+	/**
+	 * Gets the string delimited by the chosen delimiter string.
+	 *
+	 * @param _in_string - The string to search in.
+	 * @param _delimiter - The delimiter characters for the string.
+	 *
+	 * @return String delimited by the delimiters characters. Returns "" if no delimited string was found.
+	 */
+	FString GetUnencapsulatedString(const FString& _in_string, const FString& _delimiter) const;
 };

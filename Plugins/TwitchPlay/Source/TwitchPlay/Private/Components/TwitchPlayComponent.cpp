@@ -16,13 +16,18 @@ UTwitchPlayComponent::UTwitchPlayComponent()
 	OnMessageReceived.AddDynamic(this, &UTwitchPlayComponent::MessageReceivedHandler);
 }
 
+void UTwitchPlayComponent::SetupUnencapsulatedChar(const FString _command_char)
+{
+	this->command_unencapsulated_char_ = _command_char;
+}
+
 void UTwitchPlayComponent::SetupEncapsulationChars(const FString _command_char, const FString _options_char)
 {
 	this->command_encapsulation_char_ = _command_char;
 	this->options_encapsulation_char_ = _options_char;
 }
 
-bool UTwitchPlayComponent::RegisterCommand(const FString _command_name, const FOnCommandReceived& _callback_function, FString& _out_result)
+bool UTwitchPlayComponent::RegisterCommand(FString _command_name, const FOnCommandReceived& _callback_function, FString& _out_result)
 {
 	// No reason to register an empty command
 	if (_command_name == "")
@@ -30,6 +35,8 @@ bool UTwitchPlayComponent::RegisterCommand(const FString _command_name, const FO
 		_out_result = "Command type string is invalid";
 		return false;
 	}
+
+	_command_name = _command_name.ToLower();
 
 	// Pointer to the command in the event map, if present
 	// If the command is found I can use this to switch from the previous function and bind the new one
@@ -54,7 +61,7 @@ bool UTwitchPlayComponent::RegisterCommand(const FString _command_name, const FO
 	}
 }
 
-bool UTwitchPlayComponent::UnregisterCommand(const FString _command_name, FString& _out_result)
+bool UTwitchPlayComponent::UnregisterCommand(FString _command_name, FString& _out_result)
 {
 	// No reason to unregister an empty command 
 	if (_command_name == "")
@@ -62,6 +69,8 @@ bool UTwitchPlayComponent::UnregisterCommand(const FString _command_name, FStrin
 		_out_result = "Command type string is invalid";
 		return false;
 	}
+
+	_command_name = _command_name.ToLower();
 
 	if (bound_events_.Remove(_command_name) == 0)
 	{
@@ -100,6 +109,12 @@ FString UTwitchPlayComponent::GetCommandString(const FString & _message) const
 {
 	// Only the first command is accepted
 	FString ret_command = GetDelimitedString(_message, command_encapsulation_char_);
+
+	if (ret_command == "")
+	{
+		ret_command == GetUnencapsulatedString(_message, command_unencapsulated_char_);
+	}
+
 	return ret_command;
 }
 
@@ -109,6 +124,32 @@ TArray<FString> UTwitchPlayComponent::GetCommandOptionsStrings(const FString & _
 	FString options = GetDelimitedString(_message, options_encapsulation_char_);
 	options.ParseIntoArray(ret_options, TEXT(","));
 	return ret_options;
+}
+
+FString UTwitchPlayComponent::GetUnencapsulatedString(const FString & _in_string, const FString & _delimiter) const
+{
+	FString ret_delimited_string = "";
+
+	if (_in_string.IsEmpty())
+	{
+		return "";
+	}
+
+	// Where does the delimiter start?
+	// Remember that the delimiter can be more than 1 character, so we need to add
+	// the delimiter length to find the actual start of the delimited string
+	int32 command_start_index = _in_string.Find(_delimiter);
+
+	// If the message did not contain any start delimiter no command can be found
+	// Also, if the start delimiter is at the end of the string no command can be found
+	if (command_start_index == INDEX_NONE || command_start_index + _delimiter.Len() == _in_string.Len())
+	{
+		return "";
+	}
+
+	// If we have the two delimiter positions get the string inbetween them
+	ret_delimited_string = _in_string.Mid(command_start_index + _delimiter.Len(), _in_string.Len() - _delimiter.Len());
+	return ret_delimited_string.ToLower();
 }
 
 FString UTwitchPlayComponent::GetDelimitedString(const FString & _in_string, const FString & _delimiter) const
@@ -146,7 +187,7 @@ FString UTwitchPlayComponent::GetDelimitedString(const FString & _in_string, con
 
 	// If we have the two delimiter positions get the string inbetween them
 	ret_delimited_string = _in_string.Mid(command_start_index + _delimiter.Len(), (command_end_index - (command_start_index + _delimiter.Len())));
-	return ret_delimited_string;
+	return ret_delimited_string.ToLower();
 }
 
 UTwitchPlayComponent::~UTwitchPlayComponent()
