@@ -112,7 +112,7 @@ FString UTwitchPlayComponent::GetCommandString(const FString & _message) const
 
 	if (ret_command == "")
 	{
-		ret_command == GetUnencapsulatedString(_message, command_unencapsulated_char_);
+		ret_command = GetUnencapsulatedString(_message, command_unencapsulated_char_);
 	}
 
 	return ret_command;
@@ -148,7 +148,7 @@ FString UTwitchPlayComponent::GetUnencapsulatedString(const FString & _in_string
 	}
 
 	// If we have the two delimiter positions get the string inbetween them
-	ret_delimited_string = _in_string.Mid(command_start_index + _delimiter.Len(), _in_string.Len() - _delimiter.Len());
+	ret_delimited_string = _in_string.Right(_in_string.Len() - _delimiter.Len());
 	return ret_delimited_string.ToLower();
 }
 
